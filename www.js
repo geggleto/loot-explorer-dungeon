@@ -5,7 +5,8 @@ const port = process.env.PORT ?? 8000;
 const bodyParser = require('body-parser');
 const path = require('path');
 const web3 = require('./src/Infrastructure/MyWeb3');
-
+const VerifyService = require('./src/Infrastructure/VerifySignature');
+const dnd = require('dnd-npc');
 
 const MongoClient = require('./src/Infrastructure/MongoDb');
 const {ObjectId} = require("mongodb");
@@ -29,8 +30,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
-
-
 MongoClient.connectToServer( async (db) => {
     //Assert requests collection exists
     try {
@@ -51,6 +50,10 @@ MongoClient.connectToServer( async (db) => {
 
     let requestCollection = db.collection('requests');
     let tokenCollection = db.collection('tokens');
+
+    app.get('/tokens', async (req, res) => {
+        res.render('roll.html', {});
+    })
 
 
     app.get('/verify/:token', async (req, res) => {
@@ -94,20 +97,60 @@ MongoClient.connectToServer( async (db) => {
         }).toArray();
 
         res.json(tokens);
-    })
+    });
 
-    app.post('/api/verify/:token', async (req, res) => {
+    app.get('/api/tokens/by/:address', async (req, res) => {
+
+        let tokens = await tokenCollection.find({
+            owner:   {'$regex' : req.params.address, '$options' : 'i'}
+        }).toArray();
+
+        res.json(tokens);
+    });
+
+    app.post('/api/token/:token_id/roll', async (req,res) => {
+        let npc = new dnd.npc().generate();
+
+        let r = await tokenCollection.findOne({ tokenId: parseInt(req.params.token_id) });
+
         let signatureHex = req.body.signature;
         let address = req.body.address;
+        let original_message = "token-"+parseInt(req.params.token_id);
 
+        if (0 /*r.stats*/ ) {
+            res.send('error');
+        } else {
+
+            if (VerifyService.verify(address, original_message, signatureHex)) { //verified
+
+                let metadata = await axios.get('https://infura-ipfs.io/ipfs/bafybeifnr3u547tcxszqh4cx7updzer5bkvximsxqki3hizn4zlcz625du/metadata/' + req.params.token_id);
+                metadata.data.image = metadata.data.image.replace('ipfs://', 'https://infura-ipfs.io/ipfs/');
+
+                await tokenCollection.updateOne({_id: r._id},
+                    {
+                        $set: {"role": npc.role, ipfs: metadata.data}
+                    });
+
+                let t = await tokenCollection.findOne({_id: r._id})
+
+                res.json(t);
+                return;
+            } else {
+                console.log("verify failure");
+            }
+        }
+        res.send('error');
+    });
+
+    app.post('/api/verify/:token', async (req, res) => {
         let r = await requestCollection.findOne({_id: new ObjectId(req.params.token) });
 
+        let signatureHex = req.body.signature;
+        let address = req.body.address;
         let original_message = req.params.token;
 
-        let recoveredAddress = web3.eth.accounts.recover(original_message, signatureHex);
-
-        if (recoveredAddress.toUpperCase() === address.toUpperCase()) { //verified
-            let tokens = await Contract.getOwnedTokens(recoveredAddress);
+        if (VerifyService.verify(address, original_message, signatureHex)) { //verified
+            let tokens = await Contract.getOwnedTokens(address);
 
             for (let i = 0; i < tokens.length; i++) {
                 let token = parseInt(tokens[i]);
@@ -133,6 +176,7 @@ MongoClient.connectToServer( async (db) => {
     });
 
     app.get('/api/metadata/:tokenId', async (req, res) => {
+
         axios.get('https://infura-ipfs.io/ipfs/bafybeifnr3u547tcxszqh4cx7updzer5bkvximsxqki3hizn4zlcz625du/metadata/'+req.params.tokenId)
         .then(r => {
             r.data.image = r.data.image.replace('ipfs://', 'https://infura-ipfs.io/ipfs/')

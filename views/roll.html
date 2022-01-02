@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Bare - Start Bootstrap Template</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="/css/styles.css" rel="stylesheet" />
+</head>
+<body>
+<!-- Responsive navbar-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">Loot Explorer - Verify</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+    </div>
+</nav>
+<!-- Page content-->
+<div class="container">
+    <div class="text-center mt-5">
+        <div id="app">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Token ID</th>
+                    <th>Name</th>
+                    <th>Image</th>
+                    <th scope="col">STR</th>
+                    <th scope="col">DEX</th>
+                    <th scope="col">CON</th>
+                    <th scope="col">INT</th>
+                    <th scope="col">WIS</th>
+                    <th scope="col">CHA</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="row in tokens">
+                    <td>{# row.tokenId #}</td>
+                    <td>{# row.ipfs.name #}</td>
+                    <td><img :src="row.ipfs.image" style="max-height: 256px; border: 2px solid #444" alt="image" v-if="row.ipfs.image" /></td>
+                    <td scope="col">{# row.role.stats.strength ?? '-' #}</td>
+                    <td scope="col">{# row.role.stats.dexterity ?? '-' #}</td>
+                    <td scope="col">{# row.role.stats.constitution ?? '-' #}</td>
+                    <td scope="col">{# row.role.stats.intelligence ?? '-' #}</td>
+                    <td scope="col">{# row.role.stats.wisdom ?? '-' #}</td>
+                    <td scope="col">{# row.role.stats.charisma ?? '-' #}</td>
+                    <td>
+                        <button class="btn btn-primary" @click="roll(row.tokenId)">Roll</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Bootstrap core JS-->
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/web3.min.js"></script>
+<script src="/js/axios.min.js"></script>
+<script src="/js/vue.min.js"></script>
+<script type="text/javascript">
+    if (typeof window.ethereum !== 'undefined') {
+        console.log('MetaMask is installed!');
+    }
+
+    let web3 = new Web3(ethereum);
+
+    let app = new Vue({
+        el: '#app',
+        delimiters: ['{#', '#}'],
+        data: {
+            tokens : [],
+            address: ''
+        },
+        methods: {
+            async roll(tokenId) {
+                let m = web3.utils.toHex("token-"+tokenId);
+
+                await web3.eth.personal.sign(m, this.address, async (err, signature) => {
+                    axios.post('/api/token/' + tokenId + '/roll', {
+                        address: this.address,
+                        signature: signature,
+                        message: m
+                    });
+                });
+
+                location.reload();
+            }
+        },
+        async mounted() {
+            let r = await ethereum.request({ method: 'eth_requestAccounts' });
+            this.address = r[0];
+
+            this.tokens = await getTokens(this.address);
+        }
+    })
+
+    async function getTokens(address) {
+        return await axios.get('/api/tokens/by/'+address).then((response) => {
+            return response.data.map( x => {
+                if (! x['role']) {
+                    x['role'] = {
+                        'stats' : {
+                            'strength': '-',
+                            'dexterity': '-',
+                            'constitution': '-',
+                            'intelligence': '-',
+                            'wisdom': '-',
+                            'charisma': '-'
+                        }
+                    }
+                    x['ipfs'] = {
+                        'name': '????',
+                        'image': null
+                    }
+                }
+                return x;
+            })
+        })
+    }
+
+</script>
+</body>
+</html>

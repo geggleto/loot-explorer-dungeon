@@ -23,8 +23,8 @@
 <div class="container">
     <div class="text-center mt-5">
         <h1>Verify Here</h1>
-        <p class="lead">Please click the button below and complete an etereum sign</p>
-        <button class="enableEthereumButton btn btn-primary">Enable Ethereum</button>
+        <p class="lead">Please click the button below and complete an ethereum sign</p>
+        <button class="enableEthereumButton btn btn-primary">Connect and Verify</button>
     </div>
 </div>
 <!-- Bootstrap core JS-->
@@ -41,7 +41,6 @@
     let web3 = new Web3(ethereum);
 
     const token = '{{ token }}';
-    console.log(token);
 
     ethereumButton.addEventListener('click', async () => {
         ethereumButton.disable = true;
