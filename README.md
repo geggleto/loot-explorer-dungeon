@@ -53,4 +53,5 @@ Response:
 # Usage
 
 Usage is being sponsored by @geggleto via ChainHeadsInc
-This service is deployed at 
+This service is deployed at `https://loot-explorers.chainheadsinc.com/`
+Example: `https://loot-explorers.chainheadsinc.com/api/tokens/205368063820955648`
