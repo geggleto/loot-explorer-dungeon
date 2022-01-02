@@ -50,6 +50,70 @@ Response:
 ]
 ```
 
+### 4. Get Token Metadata
+This api call grabs the metadata from IPFS and translates the IPFS image into a web address
+
+GET `/api/metadata/:tokenId`
+
+Response:
+```json
+{
+	"name": "Yhado Olhiorc",
+	"image": "https://infura-ipfs.io/ipfs/bafybeihv5qxbwj3ypqqzxzdwmjdkqxq2l4xvk5yej3qyorsorpf5tlty6i/explorers/1.png",
+	"description": "Goblins are playful creatures with a knack for harmless mischief. They are no stranger to diving into hidden caves and dungeons for Loot and are especially fond of gold and shiny treasures. They belong to the Noctii race, dwellers of the Underworld. Though not much is known about them, they seem to coexist with the rest of the inhabitants in the Explorer realm.\n\nLoot Explorers are 8000 unique explorer characters decked out with gear found in the first 8000 genesis bags of loot. Each Explorer corresponds to the number of the Loot bag. Putting a twist on the classic RPG style with chunky lines and juicy colors, each Explorer's design is influenced by the loot they carry mixed in with elements such as distinct classes & cool backdrops, all attached to uniquely generated name.",
+	"attributes": [{
+		"trait_type": "Level",
+		"value": 1,
+		"display_type": "number"
+	}, {
+		"trait_type": "Background",
+		"value": "Sunset Hilltop"
+	}, {
+		"trait_type": "Race",
+		"value": "Noctii"
+	}, {
+		"trait_type": "Allegiance",
+		"value": "Sage"
+	}, {
+		"trait_type": "Origins",
+		"value": "Skeleton"
+	}, {
+		"trait_type": "Type",
+		"value": "Goblin"
+	}, {
+		"trait_type": "Head",
+		"value": "Goblin"
+	}, {
+		"trait_type": "Face",
+		"value": "Cheeky Pout"
+	}, {
+		"trait_type": "Weapon",
+		"value": "Grave Wand"
+	}, {
+		"trait_type": "Chest Armor",
+		"value": "Dark Hard Leather Armor"
+	}, {
+		"trait_type": "Head Armor",
+		"value": "Divine Hood"
+	}, {
+		"trait_type": "Waist Armor",
+		"value": "Hard Leather Belt"
+	}, {
+		"trait_type": "Foot Armor",
+		"value": "Ornate Greaves"
+	}, {
+		"trait_type": "Hand Armor",
+		"value": "Studded Leather Gloves"
+	}, {
+		"trait_type": "Necklace",
+		"value": "Necklace of Enlightenment"
+	}, {
+		"trait_type": "Ring",
+		"value": "Gold Ring"
+	}]
+}
+```
+
 # Usage
 
 Usage is being sponsored by @geggleto via ChainHeadsInc

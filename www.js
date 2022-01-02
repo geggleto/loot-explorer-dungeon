@@ -18,6 +18,8 @@ const server = http.createServer(app);
 const cors = require('cors');
 const mustacheExpress = require('mustache-express');
 
+const axios = require('axios');
+
 app.use(express.static('public'));
 app.engine('html', mustacheExpress());
 app.set("view engine", "html");
@@ -129,6 +131,18 @@ MongoClient.connectToServer( async (db) => {
             res.error()
         }
     });
+
+    app.get('/api/metadata/:tokenId', async (req, res) => {
+        axios.get('https://infura-ipfs.io/ipfs/bafybeifnr3u547tcxszqh4cx7updzer5bkvximsxqki3hizn4zlcz625du/metadata/'+req.params.tokenId)
+        .then(r => {
+            r.data.image = r.data.image.replace('ipfs://', 'https://infura-ipfs.io/ipfs/')
+
+            res.json(r.data);
+        }).catch((e) => {
+            console.log(e);
+            res.send('ERROR');
+        })
+    })
 
     server.listen(port, () => {
         console.log('server running at ' + port)
