@@ -9,6 +9,7 @@
 ```dotenv
 METAMASK_URL=
 MONGO_URL=
+PORT=
 ```
 
 # API
@@ -48,3 +49,8 @@ Response:
   {"_id":"61d0de9b3e6bc936ad5c2249","tokenId":2395,"discord_id":205368063820955650,"owner":"0xCECDDbE88359f6EcEBE90b42643B002543F27fE9"}
 ]
 ```
+
+# Usage
+
+Usage is being sponsored by @geggleto via ChainHeadsInc
+This service is deployed at 
