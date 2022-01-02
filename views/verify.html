@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Bare - Start Bootstrap Template</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="/css/styles.css" rel="stylesheet" />
+</head>
+<body>
+<!-- Responsive navbar-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">Loot Explorer - Verify</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+    </div>
+</nav>
+<!-- Page content-->
+<div class="container">
+    <div class="text-center mt-5">
+        <h1>Verify Here</h1>
+        <p class="lead">Please click the button below and complete an etereum sign</p>
+        <button class="enableEthereumButton btn btn-primary">Enable Ethereum</button>
+    </div>
+</div>
+<!-- Bootstrap core JS-->
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/web3.min.js"></script>
+<script src="/js/axios.min.js"></script>
+<script type="text/javascript">
+    if (typeof window.ethereum !== 'undefined') {
+        console.log('MetaMask is installed!');
+    }
+
+    const output = document.getElementById('tokenOut');
+    const ethereumButton = document.querySelector('.enableEthereumButton');
+    let web3 = new Web3(ethereum);
+
+    const token = '{{ token }}';
+    console.log(token);
+
+    ethereumButton.addEventListener('click', async () => {
+        ethereumButton.disable = true;
+        //Will Start the metamask extension
+        let r = await ethereum.request({ method: 'eth_requestAccounts' });
+
+        if (r.length > 0) {
+            //Make verify call
+            let m = web3.utils.toHex(token);
+
+            await web3.eth.personal.sign(m, r[0], async (err, signature) => {
+                axios.post('/api/verify/'+token, {
+                    address: r[0],
+                    signature: signature,
+                    message: m
+                }).then( (res) => {
+                    console.log("Verified");
+                }).catch((e) => {
+                    console.error(e);
+                    console.log("Verification Failed");
+                })
+            });
+
+        } else {
+            //Not Connected
+            ethereumButton.disable = false;
+        }
+    });
+</script>
+</body>
+</html>
